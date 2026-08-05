@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import GetHelpNow from './GetHelpNow'
@@ -11,11 +12,15 @@ const navLinkClass = ({ isActive }) =>
 export default function Layout() {
   const { user, isLoggedIn, isCounsellor, isAdmin, logout } = useAuth()
   const navigate = useNavigate()
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const handleLogout = () => {
+    setMenuOpen(false)
     logout()
     navigate('/login')
   }
+
+  const closeMenu = () => setMenuOpen(false)
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -53,19 +58,74 @@ export default function Layout() {
                   )}
                 </span>
                 {isLoggedIn && <NotificationsBell />}
-                <Link to="/settings" className="rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100">Settings</Link>
-                <button onClick={handleLogout} className="rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100">
+                <Link to="/settings" className="hidden rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 md:inline-block">Settings</Link>
+                <button onClick={handleLogout} className="hidden rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 md:inline-block">
                   Log out
+                </button>
+                <button
+                  onClick={() => setMenuOpen((o) => !o)}
+                  className="rounded-md p-2 text-gray-600 transition hover:bg-gray-100 md:hidden"
+                  aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+                  aria-expanded={menuOpen}
+                >
+                  {menuOpen ? (
+                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  ) : (
+                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  )}
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100">Log in</Link>
-                <Link to="/register" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700">Sign up</Link>
+                <Link to="/login" className="hidden rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 md:inline-block">Log in</Link>
+                <Link to="/register" className="hidden rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 md:inline-block">Sign up</Link>
+                <button
+                  onClick={() => setMenuOpen((o) => !o)}
+                  className="rounded-md p-2 text-gray-600 transition hover:bg-gray-100 md:hidden"
+                  aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+                  aria-expanded={menuOpen}
+                >
+                  {menuOpen ? (
+                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  ) : (
+                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  )}
+                </button>
               </>
             )}
           </div>
         </div>
+
+        {menuOpen && (
+          <nav className="border-t border-gray-200 bg-white px-4 py-3 md:hidden">
+            <div className="mx-auto flex max-w-6xl flex-col gap-1">
+              {isLoggedIn && (
+                <>
+                  <NavLink to="/" className={navLinkClass} end onClick={closeMenu}>Dashboard</NavLink>
+                  <NavLink to="/mood" className={navLinkClass} onClick={closeMenu}>Log Mood</NavLink>
+                  <NavLink to="/journal" className={navLinkClass} onClick={closeMenu}>Journal</NavLink>
+                  <NavLink to="/resources" className={navLinkClass} onClick={closeMenu}>Resources</NavLink>
+                  {isCounsellor && <NavLink to="/counsellor" className={navLinkClass} onClick={closeMenu}>Support Queue</NavLink>}
+                  {isAdmin && <NavLink to="/admin" className={navLinkClass} onClick={closeMenu}>Admin</NavLink>}
+                </>
+              )}
+              {!isLoggedIn && (
+                <>
+                  <NavLink to="/login" className={navLinkClass} onClick={closeMenu}>Log in</NavLink>
+                  <NavLink to="/register" className={navLinkClass} onClick={closeMenu}>Sign up</NavLink>
+                </>
+              )}
+            </div>
+          </nav>
+        )}
       </header>
 
       <main className="flex-1">
