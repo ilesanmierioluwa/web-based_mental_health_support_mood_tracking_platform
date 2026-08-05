@@ -1,0 +1,164 @@
+============================================================================
+USER GUIDE
+Web-Based Mental Health Support and Mood Tracking Platform (MoodPath)
+============================================================================
+
+This document summarises the platform, explains the three user roles,
+provides the seeded demo accounts, and shows you how to run the system.
+
+---------------------------------------------------------------------------
+1. PROJECT SUMMARY
+---------------------------------------------------------------------------
+MoodPath is an academic prototype for a self-monitoring and early-awareness
+tool. It lets users:
+
+  - Register and log in (JWT + bcrypt, optional TOTP two-factor auth)
+  - Log daily mood check-ins (1-5 mood scale, tags, optional short note)
+  - Write private journal entries (stored encrypted at rest, AES-256-GCM)
+  - View mood trends over time (day/week/month charts) and how moods
+    correlate with tags
+  - Browse a curated self-help resource library with personalised
+    recommendations based on recent moods/tags
+  - Get escalated support: a keyword-based risk detection engine scans
+    journal entries and classifies them into tiers. Higher-tier entries are
+    routed to a human counsellor/support contact for follow-up
+  - Request a call-back from the support team at any time (independent of
+    any automatic detection), with an always-visible "Get Help Now" button
+    on every screen
+  - Export their own data or permanently delete their account
+
+IMPORTANT: This platform is a self-monitoring and early-awareness tool, NOT
+a diagnostic or treatment system. It never diagnoses users. It complements
+-- it does not replace -- professional mental health care and crisis
+services. The keyword-based risk detection is a blunt, imperfect triage aid
+and always routes to a human decision-maker.
+
+---------------------------------------------------------------------------
+2. TECH STACK
+---------------------------------------------------------------------------
+  - Backend:  Node.js + Express + Mongoose (MongoDB Atlas)
+  - Auth:     JWT + bcrypt, optional TOTP MFA (speakeasy)
+  - Security: AES-256-GCM field-level encryption for journal content,
+              mood notes, and counsellor notes
+  - Email:    Brevo (Sendinblue) API for escalation and call-back emails,
+              with an in-app dashboard alert as a non-email fallback
+  - Frontend: React (Vite) + Tailwind CSS + Recharts
+  - Hosting:  Backend on any Node host (e.g. Render); frontend on Vercel
+              (see client/vercel.json)
+
+---------------------------------------------------------------------------
+3. USER ROLES
+---------------------------------------------------------------------------
+  ROLE: USER
+  - Log mood entries, write journal entries, view analytics and resources
+  - Request a call-back from the support team
+  - Manage own MFA, export own data, delete own account
+  - Sees in-app notifications (e.g. when an entry is escalated)
+
+  ROLE: COUNSELLOR / SUPPORT CONTACT
+  - Reviews the escalation queue (tier 2 and tier 3 flagged entries)
+  - Can view ONLY the specific escalated entry (never the user's full
+    journal), mark it reviewed/contacted/resolved, and add private notes
+  - Reviews and responds to user-initiated call-back requests
+  - Every view/action is written to the audit log
+
+  ROLE: ADMIN
+  - Manages the risk-keyword list (with auditable version history)
+  - Manages the resource library
+  - Creates/manages counsellor and admin accounts
+  - Views the audit log
+  - Does NOT have routine access to users' private journals
+
+---------------------------------------------------------------------------
+4. SEEDED DEMO ACCOUNTS
+---------------------------------------------------------------------------
+The database is seeded with the following accounts (run "npm run seed"):
+
+  ADMIN
+    Email:    admin@moodplatform.test
+    Password: AdminPass123!
+
+  COUNSELLOR / SUPPORT CONTACT
+    Email:    counsellor@moodplatform.test
+    Password: CounsellorPass123!
+
+  (Regular users register their own account on the sign-up page. The
+  sign-up page requires acknowledging the Privacy Policy before an account
+  is created.)
+
+---------------------------------------------------------------------------
+5. RUNNING THE PROJECT LOCALLY
+---------------------------------------------------------------------------
+Prerequisites: Node.js, and a MongoDB Atlas connection string.
+
+  1. Configure server/.env (copy the template values):
+       MONGODB_URI=<your atlas connection string>
+       JWT_SECRET=<long random string>
+       ENCRYPTION_KEY=<64 character hex string>
+       BREVO_API_KEY=<optional, for emails>
+       BREVO_SENDER_MAIL=<optional, verified Brevo sender>
+       COUNSELLOR_EMAIL=<recipient of escalation emails>
+       PORT=5000
+       FRONTEND_URL=http://localhost:5173
+
+  2. Install dependencies:
+       npm install --prefix server
+       npm install --prefix client
+
+  3. Seed the starter data (risk keywords, resources, demo accounts):
+       npm run seed
+
+  4. Start the servers (from the project root):
+       npm run server   ->  API on  http://localhost:5000
+       npm run client   ->  App on  http://localhost:5173
+
+  5. Open http://localhost:5173 in your browser.
+
+---------------------------------------------------------------------------
+6. SUGGESTED DEMO WALKTHROUGH
+---------------------------------------------------------------------------
+  1. Register a new user and confirm the Privacy Policy acknowledgment.
+  2. Log a few mood check-ins with tags -> see the mood chart, tag
+     correlation and streak update.
+  3. Write a neutral journal entry -> no concerns, no escalation.
+  4. Write an entry containing a Tier-1/Tier-2 seeded term (e.g.
+     "overwhelmed" or "no way out") -> it is flagged and appears in the
+     counsellor queue.
+  5. Write an entry containing the safe demo phrase DEMO_TIER3_TEST_PHRASE
+     -> the supportive in-app panel appears and the counsellor is notified.
+  6. Log in as the counsellor, open the flagged entry (only that entry is
+     shown), mark it "contacted user" with a note.
+  7. Use the "Get Help Now" button from a few different screens and
+     request a call-back.
+  8. Use "Export my data" and "Delete my account" in Settings.
+  9. Log in as admin to view the risk-keyword management (with version
+     history) and the audit log.
+
+---------------------------------------------------------------------------
+7. TESTING NOTES
+---------------------------------------------------------------------------
+  - Backend endpoints were verified with curl (validation, role
+    protection, encryption at rest, escalation + fallback behaviour).
+  - Full user/counsellor/admin flows were verified in a headless browser
+    with zero console errors.
+  - No automated E2E test suite is included by design (scope decision).
+  - The Tier-3 risk-keyword list intentionally contains only the safe
+    placeholder phrase DEMO_TIER3_TEST_PHRASE so the escalation flow can be
+    demonstrated without shipping a real harm-enabling phrase list. A real
+    deployment must source and maintain the Tier-3 list with the
+    institution's counselling unit / qualified professionals.
+
+---------------------------------------------------------------------------
+8. SECURITY & PRIVACY NOTES
+---------------------------------------------------------------------------
+  - Journal content is encrypted at rest and only decrypted for its owner,
+    or for the specific escalated entry viewed by an authorised counsellor.
+  - Counsellors cannot browse a user's full journal (enforced in code).
+  - All sensitive actions are audit-logged.
+  - Before any real deployment, confirm current, verified crisis-line and
+    counselling contact details with your institution, and run the system
+    in partnership with qualified mental health professionals.
+
+============================================================================
+END OF USER GUIDE
+============================================================================
