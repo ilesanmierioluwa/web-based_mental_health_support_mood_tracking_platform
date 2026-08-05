@@ -1,0 +1,13 @@
+{
+  "name": "mental-health-support-platform",
+  "version": "1.0.0",
+  "description": "Web-Based Mental Health Support and Mood Tracking Platform (academic prototype)",
+  "scripts": {
+    "server": "npm run dev --prefix server",
+    "client": "npm run dev --prefix client",
+    "seed": "npm run seed --prefix server",
+    "start:server": "npm start --prefix server",
+    "start:client": "npm run preview --prefix client"
+  },
+  "license": "MIT"
+}

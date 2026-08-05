@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment variables / secrets
+.env
+.env.local
+.env.production
+server/.env
+client/.env
+client/.env.local
+
+# Build output
+dist/
+build/
+client/dist/
+server/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Misc
+*.pid
+coverage/
+
+# Contains MongoDB Atlas credentials — do not push
+Mental_Health_Support_Mood_Tracking_Platform_Implementation_Guide.txt
