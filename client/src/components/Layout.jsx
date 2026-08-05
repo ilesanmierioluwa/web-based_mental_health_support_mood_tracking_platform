@@ -115,6 +115,10 @@ export default function Layout() {
                   <NavLink to="/resources" className={navLinkClass} onClick={closeMenu}>Resources</NavLink>
                   {isCounsellor && <NavLink to="/counsellor" className={navLinkClass} onClick={closeMenu}>Support Queue</NavLink>}
                   {isAdmin && <NavLink to="/admin" className={navLinkClass} onClick={closeMenu}>Admin</NavLink>}
+                  <NavLink to="/settings" className={navLinkClass} onClick={closeMenu}>Settings</NavLink>
+                  <button onClick={handleLogout} className="mt-1 rounded-md bg-brand-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-brand-700">
+                    Log out
+                  </button>
                 </>
               )}
               {!isLoggedIn && (
